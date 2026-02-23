@@ -3,6 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Amazon - page title', () => {
   test('navigate to Amazon and capture the title', async ({ page }) => {
     await page.goto('https://www.amazon.com/', { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => document.title && document.title.length > 0);
 
     // Amazon may show a region banner/cookie dialog or bot-check; keep the assertion resilient.
     const title = await page.title();
