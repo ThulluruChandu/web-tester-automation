@@ -16,7 +16,7 @@ test.describe('Wikipedia - India article', () => {
     await searchInput.press('Enter');
 
     // Article page
-    await expect(page.getByRole('heading', { name: 'India' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'India', exact: true })).toBeVisible();
 
     // Infobox "Capital" row
     const capitalCell = page
