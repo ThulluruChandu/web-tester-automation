@@ -42,7 +42,7 @@ test.describe('KAN-2: Verify country capital information on Wikipedia', () => {
   test('TC02 - Search India and verify capital is New Delhi', async ({ page }) => {
     await searchFromHome(page, 'India');
 
-    await expect(page.getByRole('heading', { name: 'India' })).toBeVisible();
+    await expect(page.locator('#firstHeading')).toHaveText(/India/i);
     const capital = await getInfoboxCapital(page);
 
     expect(capital).toMatch(/New Delhi/i);
@@ -55,7 +55,7 @@ test.describe('KAN-2: Verify country capital information on Wikipedia', () => {
     await expect(page).toHaveURL(WIKI_HOME);
 
     await searchFromHome(page, 'United Kingdom');
-    await expect(page.getByRole('heading', { name: 'United Kingdom' })).toBeVisible();
+    await expect(page.locator('#firstHeading')).toHaveText(/United Kingdom/i);
 
     const capital = await getInfoboxCapital(page);
     expect(capital).not.toMatch(/Eastern Cape/i);
