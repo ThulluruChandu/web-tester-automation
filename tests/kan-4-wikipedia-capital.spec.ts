@@ -28,3 +28,44 @@ async function getInfoboxCapital(page: Page): Promise<string> {
   const capitalText = await capitalRow.locator('td').first().innerText();
   return capitalText.replace(/\[[^\]]+\]/g, '').trim();
 }
+
+test.describe('KAN-4: Verify country capital information on Wikipedia', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto(WIKI_HOME);
+  });
+
+  test('TC01 - Wikipedia homepage loads and search is available', async ({ page }) => {
+    await expect(page).toHaveURL(WIKI_HOME);
+    await expect(page.getByLabel('Search Wikipedia')).toBeVisible();
+  });
+
+  test('TC02 - Search India and verify capital is New Delhi', async ({ page }) => {
+    await searchFromHome(page, 'India');
+
+    await expect(page.getByRole('heading', { name: 'India' })).toBeVisible();
+    const capital = await getInfoboxCapital(page);
+
+    expect(capital).toMatch(/New Delhi/i);
+  });
+
+  test('TC03 - Navigate back to Wikipedia home', async ({ page }) => {
+    await searchFromHome(page, 'India');
+    await expect(page.getByRole('heading', { name: 'India' })).toBeVisible();
+
+    await page.goBack();
+    await expect(page).toHaveURL(WIKI_HOME);
+  });
+
+  test('TC04 - Search United Kingdom and verify capital is NOT Eastern Cape (negative test case)', async ({ page }) => {
+    await searchFromHome(page, 'United Kingdom');
+
+    await expect(page.getByRole('heading', { name: 'United Kingdom' })).toBeVisible();
+    const capital = await getInfoboxCapital(page);
+
+    expect(capital).not.toMatch(/Eastern Cape/i);
+    expect(capital).toMatch(/London/i);
+
+    ensureArtifactsDir();
+    await page.screenshot({ path: RESULT_SCREENSHOT, fullPage: true });
+  });
+});
