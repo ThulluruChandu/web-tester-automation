@@ -1,4 +1,5 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect } from './fixtures/sharedPage';
+import type { Page } from '@playwright/test';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
@@ -29,40 +30,40 @@ async function getInfoboxCapital(page: Page): Promise<string> {
   return capitalText.replace(/\[[^\]]+\]/g, '').trim();
 }
 
-test.describe('KAN-2: Verify country capital information on Wikipedia', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto(WIKI_HOME);
+test.describe.serial('KAN-2: Verify country capital information on Wikipedia', () => {
+  test.beforeEach(async ({ sharedPage }) => {
+    await sharedPage.goto(WIKI_HOME);
   });
 
-  test('TC01 - Wikipedia homepage loads and search is available', async ({ page }) => {
+  test('TC01 - Wikipedia homepage loads and search is available', async ({ sharedPage }) => {
     await expect(page).toHaveURL(WIKI_HOME);
     await expect(page.getByLabel('Search Wikipedia')).toBeVisible();
   });
 
-  test('TC02 - Search India and verify capital is New Delhi', async ({ page }) => {
-    await searchFromHome(page, 'India');
+  test('TC02 - Search India and verify capital is New Delhi', async ({ sharedPage }) => {
+    await searchFromHome(sharedPage, 'India');
 
-    await expect(page.getByRole('heading', { name: 'India' })).toBeVisible();
-    const capital = await getInfoboxCapital(page);
+    await expect(sharedPage.getByRole('heading', { name: 'India' })).toBeVisible();
+    const capital = await getInfoboxCapital(sharedPage);
 
     expect(capital).toMatch(/New Delhi/i);
   });
 
-  test('TC03 - Search United Kingdom and verify capital is NOT Eastern Cape (negative test)', async ({ page }) => {
-    await searchFromHome(page, 'India');
-    await page.goBack();
+  test('TC03 - Search United Kingdom and verify capital is NOT Eastern Cape (negative test)', async ({ sharedPage }) => {
+    await searchFromHome(sharedPage, 'India');
+    await sharedPage.goBack();
 
-    await expect(page).toHaveURL(WIKI_HOME);
+    await expect(sharedPage).toHaveURL(WIKI_HOME);
 
-    await searchFromHome(page, 'United Kingdom');
-    await expect(page.getByRole('heading', { name: 'United Kingdom' })).toBeVisible();
+    await searchFromHome(sharedPage, 'United Kingdom');
+    await expect(sharedPage.getByRole('heading', { name: 'United Kingdom' })).toBeVisible();
 
-    const capital = await getInfoboxCapital(page);
+    const capital = await getInfoboxCapital(sharedPage);
     expect(capital).not.toMatch(/Eastern Cape/i);
 
     // Confluence attachment requires a resolvable file path in runtime.
     // Save screenshot to ./artifacts so pipeline/agent can reference it.
     ensureArtifactsDir();
-    await page.screenshot({ path: RESULT_SCREENSHOT, fullPage: true });
+    await sharedPage.screenshot({ path: RESULT_SCREENSHOT, fullPage: true });
   });
 });
