@@ -2,7 +2,9 @@ import { test, expect, type Page } from '@playwright/test';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
-const ARTIFACTS_DIR = path.resolve(process.cwd(), 'artifacts');
+// IMPORTANT for Confluence attachment upload:
+// keep the screenshot path RELATIVE (./artifacts/...) so the runtime/artifact collector can resolve it.
+const ARTIFACTS_DIR = 'artifacts';
 const RESULT_SCREENSHOT = path.join(ARTIFACTS_DIR, 'kan-2-result.png');
 
 function ensureArtifactsDir() {
