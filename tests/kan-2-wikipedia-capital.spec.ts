@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
-import fs from 'node:fs';
-import path from 'node:path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 const ARTIFACTS_DIR = path.resolve(process.cwd(), 'artifacts');
 const RESULT_SCREENSHOT = path.join(ARTIFACTS_DIR, 'kan-2-result.png');
