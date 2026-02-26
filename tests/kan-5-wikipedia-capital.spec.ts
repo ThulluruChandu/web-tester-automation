@@ -25,5 +25,38 @@ test.describe('KAN-5: Verify country capital information on Wikipedia', () => {
     await page.goto(WIKI_HOME);
   });
 
-  // Test cases are added below
+  test('TC01 - Wikipedia homepage loads and search is available', async ({ page }) => {
+    await expect(page).toHaveURL(WIKI_HOME);
+    await expect(page.getByLabel('Search Wikipedia')).toBeVisible();
+  });
+
+  test('TC02 - Search India and verify capital is New Delhi', async ({ page }) => {
+    await searchFromHome(page, 'India');
+
+    await expect(page.getByRole('heading', { name: 'India' })).toBeVisible();
+    const capital = await getInfoboxCapital(page);
+
+    expect(capital).toMatch(/New Delhi/i);
+  });
+
+  test('TC03 - Navigate back to Wikipedia home after viewing India page', async ({ page }) => {
+    await searchFromHome(page, 'India');
+    await expect(page.getByRole('heading', { name: 'India' })).toBeVisible();
+
+    await page.goBack();
+
+    await expect(page).toHaveURL(WIKI_HOME);
+    await expect(page.getByLabel('Search Wikipedia')).toBeVisible();
+  });
+
+  test('TC04 - Search United Kingdom and verify capital is not Eastern Cape (negative test)', async ({ page }) => {
+    await searchFromHome(page, 'United Kingdom');
+
+    await expect(page.getByRole('heading', { name: 'United Kingdom' })).toBeVisible();
+    const capital = await getInfoboxCapital(page);
+
+    expect(capital).not.toMatch(/Eastern Cape/i);
+    // Optional stronger check (current Wikipedia):
+    expect(capital).toMatch(/London/i);
+  });
 });
