@@ -12,8 +12,9 @@ function ensureArtifactsDir() {
 const WIKI_HOME = 'https://www.wikipedia.org/';
 
 async function searchFromHome(page: Page, query: string) {
-  await page.getByLabel('Search Wikipedia').fill(query);
-  await page.getByRole('button', { name: /search/i }).click();
+  const searchBox = page.getByLabel('Search Wikipedia');
+  await searchBox.fill(query);
+  await searchBox.press('Enter');
 }
 
 async function getInfoboxCapital(page: Page): Promise<string> {
