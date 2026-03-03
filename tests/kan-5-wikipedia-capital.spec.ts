@@ -26,7 +26,8 @@ async function getInfoboxCapital(page: Page): Promise<string> {
   await expect(capitalRow).toBeVisible();
 
   const capitalText = await capitalRow.locator('td').first().innerText();
-  return capitalText.replace(/\[[^\]]+\]/g, '').trim();
+  const cleaned = capitalText.replace(/\[[^\]]+\]/g, '').trim();
+  return cleaned.split('\n')[0].trim();
 }
 
 test.describe('KAN-5 - Verify country capital information on Wikipedia', () => {
