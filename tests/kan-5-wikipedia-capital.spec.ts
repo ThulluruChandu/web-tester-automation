@@ -28,3 +28,28 @@ async function getInfoboxCapital(page: Page): Promise<string> {
   const capitalText = await capitalRow.locator('td').first().innerText();
   return capitalText.replace(/\[[^\]]+\]/g, '').trim();
 }
+
+test.describe('KAN-5 - Verify country capital information on Wikipedia', () => {
+  test('TC01: Search India and verify capital is New Delhi', async ({ page }) => {
+    ensureArtifactsDir();
+
+    await page.goto(WIKI_HOME);
+    await searchFromHome(page, 'India');
+
+    const capital = await getInfoboxCapital(page);
+    await expect(capital).toBe('New Delhi');
+
+    await page.screenshot({ path: RESULT_SCREENSHOT, fullPage: true });
+  });
+
+  test('TC02: Search United Kingdom and verify capital is NOT Eastern Cape (negative)', async ({ page }) => {
+    await page.goto(WIKI_HOME);
+    await searchFromHome(page, 'United Kingdom');
+
+    const capital = await getInfoboxCapital(page);
+    await expect(capital).not.toBe('Eastern Cape');
+
+    // Optional stronger assertion to keep test valuable even if infobox format changes slightly.
+    await expect(capital.toLowerCase()).toContain('london');
+  });
+});
