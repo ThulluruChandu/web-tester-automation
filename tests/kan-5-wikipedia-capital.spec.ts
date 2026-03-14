@@ -42,7 +42,7 @@ test.describe('KAN-5: Verify country capital information on Wikipedia', () => {
   test('TC02 - Search India and verify capital is New Delhi', async ({ page }) => {
     await searchFromHome(page, 'India');
 
-    await expect(page.getByRole('heading', { name: 'India' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'India', exact: true })).toBeVisible();
     const capital = await getInfoboxCapital(page);
 
     expect(capital).toMatch(/New Delhi/i);
@@ -50,7 +50,7 @@ test.describe('KAN-5: Verify country capital information on Wikipedia', () => {
 
   test('TC03 - Navigate back to Wikipedia home from an article', async ({ page }) => {
     await searchFromHome(page, 'India');
-    await expect(page.getByRole('heading', { name: 'India' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'India', exact: true })).toBeVisible();
 
     await page.goBack();
     await expect(page).toHaveURL(WIKI_HOME);
@@ -60,13 +60,13 @@ test.describe('KAN-5: Verify country capital information on Wikipedia', () => {
   test('TC04 - Search United Kingdom and verify capital is NOT Eastern Cape (negative test)', async ({ page }) => {
     // Follow the acceptance criteria flow: search India, go back home, then search UK.
     await searchFromHome(page, 'India');
-    await expect(page.getByRole('heading', { name: 'India' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'India', exact: true })).toBeVisible();
 
     await page.goBack();
     await expect(page).toHaveURL(WIKI_HOME);
 
     await searchFromHome(page, 'United Kingdom');
-    await expect(page.getByRole('heading', { name: 'United Kingdom' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'United Kingdom', exact: true })).toBeVisible();
 
     const capital = await getInfoboxCapital(page);
     expect(capital).not.toMatch(/Eastern Cape/i);
