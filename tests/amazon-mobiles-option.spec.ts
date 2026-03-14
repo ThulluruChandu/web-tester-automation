@@ -3,6 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Amazon.com navigation', () => {
   test('Check whether "Mobiles" option is present', async ({ page }) => {
     await page.goto('https://www.amazon.com/', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveTitle(/Amazon/i);
 
     // Handle possible cookie/consent prompts (best-effort).
     const acceptCookies = page
