@@ -32,26 +32,29 @@ async function getInfoboxCapital(page: Page): Promise<string> {
 }
 
 test.describe('KAN-5 - Verify country capital information on Wikipedia', () => {
-  test('TC01: Search India and verify capital is New Delhi', async ({ page }) => {
+  test('TC01-TC02: Verify capitals for India and United Kingdom within a single session', async ({ page }) => {
     ensureArtifactsDir();
 
+    // Single browser session/window: navigate once, then perform both searches sequentially.
     await page.goto(WIKI_HOME);
-    await searchFromHome(page, 'India');
 
-    const capital = await getInfoboxCapital(page);
-    await expect(capital).toBe('New Delhi');
+    // TC01
+    await searchFromHome(page, 'India');
+    const indiaCapital = await getInfoboxCapital(page);
+    await expect(indiaCapital).toBe('New Delhi');
+
+    // Navigate back to Wikipedia home only once (as per AC)
+    await page.goBack();
+    await expect(page).toHaveURL(WIKI_HOME);
+
+    // TC02 (negative)
+    await searchFromHome(page, 'United Kingdom');
+    const ukCapital = await getInfoboxCapital(page);
+    await expect(ukCapital).not.toBe('Eastern Cape');
+
+    // Stronger assertion to keep test valuable.
+    await expect(ukCapital.toLowerCase()).toContain('london');
 
     await page.screenshot({ path: RESULT_SCREENSHOT, fullPage: true });
-  });
-
-  test('TC02: Search United Kingdom and verify capital is NOT Eastern Cape (negative)', async ({ page }) => {
-    await page.goto(WIKI_HOME);
-    await searchFromHome(page, 'United Kingdom');
-
-    const capital = await getInfoboxCapital(page);
-    await expect(capital).not.toBe('Eastern Cape');
-
-    // Optional stronger assertion to keep test valuable even if infobox format changes slightly.
-    await expect(capital.toLowerCase()).toContain('london');
   });
 });
