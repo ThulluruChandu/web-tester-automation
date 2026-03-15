@@ -29,39 +29,30 @@ async function getInfoboxCapital(page: Page): Promise<string> {
   return capitalText.replace(/\[[^\]]+\]/g, '').trim();
 }
 
-test.describe('KAN-2: Verify country capital information on Wikipedia', () => {
-  test.beforeEach(async ({ page }) => {
+test.describe('KAN-2: Verify country capital information on Wikipedia (single browser session)', () => {
+  test('TC01 - Verify India capital and UK negative capital in one session', async ({ page }) => {
+    // Browser-handling policy:
+    // - one browser session (handled by Playwright worker)
+    // - one page/tab
+    // - no repeated navigation/search beyond what is required
     await page.goto(WIKI_HOME);
-  });
-
-  test('TC01 - Wikipedia homepage loads and search is available', async ({ page }) => {
     await expect(page).toHaveURL(WIKI_HOME);
-    await expect(page.getByLabel('Search Wikipedia')).toBeVisible();
-  });
 
-  test('TC02 - Search India and verify capital is New Delhi', async ({ page }) => {
+    // Search India and verify capital
     await searchFromHome(page, 'India');
-
     await expect(page.getByRole('heading', { name: 'India' })).toBeVisible();
-    const capital = await getInfoboxCapital(page);
+    const indiaCapital = await getInfoboxCapital(page);
+    expect(indiaCapital).toMatch(/New Delhi/i);
 
-    expect(capital).toMatch(/New Delhi/i);
-  });
+    // Reuse the Wikipedia article search box (no navigation back to home)
+    await page.locator('input[name="search"]').fill('United Kingdom');
+    await page.locator('input[name="search"]').press('Enter');
 
-  test('TC03 - Search United Kingdom and verify capital is NOT Eastern Cape (negative test)', async ({ page }) => {
-    await searchFromHome(page, 'India');
-    await page.goBack();
-
-    await expect(page).toHaveURL(WIKI_HOME);
-
-    await searchFromHome(page, 'United Kingdom');
     await expect(page.getByRole('heading', { name: 'United Kingdom' })).toBeVisible();
-
-    const capital = await getInfoboxCapital(page);
-    expect(capital).not.toMatch(/Eastern Cape/i);
+    const ukCapital = await getInfoboxCapital(page);
+    expect(ukCapital).not.toMatch(/Eastern Cape/i);
 
     // Confluence attachment requires a resolvable file path in runtime.
-    // Save screenshot to ./artifacts so pipeline/agent can reference it.
     ensureArtifactsDir();
     await page.screenshot({ path: RESULT_SCREENSHOT, fullPage: true });
   });
