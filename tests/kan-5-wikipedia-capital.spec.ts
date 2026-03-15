@@ -47,13 +47,11 @@ test.describe('KAN-5 - Verify country capital information on Wikipedia', () => {
     await page.goBack();
     await expect(page).toHaveURL(WIKI_HOME);
 
-    // TC02 (negative)
+    // TC02 (as per AC text): expect "Eastern Cape" to be mentioned as capital
+    // NOTE: This expectation is intentionally aligned to AC wording and should fail on Wikipedia.
     await searchFromHome(page, 'United Kingdom');
     const ukCapital = await getInfoboxCapital(page);
-    await expect(ukCapital).not.toBe('Eastern Cape');
-
-    // Stronger assertion to keep test valuable.
-    await expect(ukCapital.toLowerCase()).toContain('london');
+    await expect(ukCapital).toBe('Eastern Cape');
 
     await page.screenshot({ path: RESULT_SCREENSHOT, fullPage: true });
   });
