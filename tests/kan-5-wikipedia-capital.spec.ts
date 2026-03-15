@@ -38,31 +38,30 @@ test.describe('KAN-5: Verify country capital information on Wikipedia', () => {
     await expect(page.getByLabel('Search Wikipedia')).toBeVisible();
   });
 
-  test('TC02 - Search India and verify that the capital listed is New Delhi', async ({ page }) => {
+  test('TC02 - Search India, verify capital is New Delhi, then navigate back to home', async ({ page }) => {
     await searchFromHome(page, 'India');
 
     await expect(page.getByRole('heading', { name: 'India' })).toBeVisible();
     const capital = await getInfoboxCapital(page);
-
     expect(capital).toMatch(/New Delhi/i);
-  });
 
-  test('TC03 - Navigate back to Wikipedia homepage after a search', async ({ page }) => {
-    await searchFromHome(page, 'India');
-    await expect(page.getByRole('heading', { name: 'India' })).toBeVisible();
-
+    // Navigate back to Wikipedia home (do not repeat the same search in other tests)
     await page.goBack();
     await expect(page).toHaveURL(WIKI_HOME);
     await expect(page.getByLabel('Search Wikipedia')).toBeVisible();
   });
 
-  test('TC04 - Search United Kingdom and verify the capital is not listed as Eastern Cape (negative test case)', async ({ page }) => {
+  test('TC03 - Search United Kingdom and verify the capital is not Eastern Cape (negative test case)', async ({ page }) => {
     await searchFromHome(page, 'United Kingdom');
 
     await expect(page.getByRole('heading', { name: 'United Kingdom' })).toBeVisible();
 
     const capital = await getInfoboxCapital(page);
+
+    // Story expectation: UK capital should NOT be "Eastern Cape"
     expect(capital).not.toMatch(/Eastern Cape/i);
+
+    // Extra safety assertion (expected current real-world value)
     expect(capital).toMatch(/London/i);
 
     ensureArtifactsDir();
