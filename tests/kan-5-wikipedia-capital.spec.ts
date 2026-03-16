@@ -49,7 +49,7 @@ test.describe('KAN-5: Verify country capital information on Wikipedia', () => {
 
     // TC04 - Search United Kingdom and verify capital is NOT Eastern Cape (negative test)
     await searchFromHome(page, 'United Kingdom');
-    await expect(page.getByRole('heading', { name: 'United Kingdom' })).toBeVisible();
+    await expect(page.locator('#firstHeading')).toHaveText('United Kingdom');
 
     const ukCapital = await getInfoboxCapital(page);
     expect(ukCapital).not.toMatch(/Eastern Cape/i);
