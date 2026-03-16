@@ -29,40 +29,33 @@ async function getInfoboxCapital(page: Page): Promise<string> {
 }
 
 test.describe('KAN-5: Verify country capital information on Wikipedia', () => {
-  test.beforeEach(async ({ page }) => {
+  test('TC01 - Verify India capital is New Delhi; then UK capital is NOT Eastern Cape (single session)', async ({ page }) => {
+    // Single browser session + single tab: navigate once, run all checks sequentially
     await page.goto(WIKI_HOME);
-  });
-
-  test('TC01 - Wikipedia homepage loads and search is available', async ({ page }) => {
     await expect(page).toHaveURL(WIKI_HOME);
     await expect(page.getByLabel('Search Wikipedia')).toBeVisible();
-  });
 
-  test('TC02 - Search India, verify capital is New Delhi, then navigate back to home', async ({ page }) => {
+    // Step 1: India
     await searchFromHome(page, 'India');
-
     await expect(page.getByRole('heading', { name: 'India' })).toBeVisible();
-    const capital = await getInfoboxCapital(page);
-    expect(capital).toMatch(/New Delhi/i);
+    const indiaCapital = await getInfoboxCapital(page);
+    expect(indiaCapital).toMatch(/New Delhi/i);
 
-    // Navigate back to Wikipedia home (do not repeat the same search in other tests)
+    // Navigate back to home exactly once
     await page.goBack();
     await expect(page).toHaveURL(WIKI_HOME);
-    await expect(page.getByLabel('Search Wikipedia')).toBeVisible();
-  });
 
-  test('TC03 - Search United Kingdom and verify the capital is not Eastern Cape (negative test case)', async ({ page }) => {
+    // Step 2: United Kingdom (negative check)
     await searchFromHome(page, 'United Kingdom');
-
     await expect(page.getByRole('heading', { name: 'United Kingdom' })).toBeVisible();
 
-    const capital = await getInfoboxCapital(page);
+    const ukCapital = await getInfoboxCapital(page);
 
     // Story expectation: UK capital should NOT be "Eastern Cape"
-    expect(capital).not.toMatch(/Eastern Cape/i);
+    expect(ukCapital).not.toMatch(/Eastern Cape/i);
 
-    // Extra safety assertion (expected current real-world value)
-    expect(capital).toMatch(/London/i);
+    // Real-world sanity check
+    expect(ukCapital).toMatch(/London/i);
 
     ensureArtifactsDir();
     await page.screenshot({ path: path.join(ARTIFACTS_DIR, 'kan-5-uk-capital.png'), fullPage: true });
