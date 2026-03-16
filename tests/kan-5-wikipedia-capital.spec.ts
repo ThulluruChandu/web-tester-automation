@@ -30,46 +30,29 @@ async function getInfoboxCapital(page: Page): Promise<string> {
 }
 
 test.describe('KAN-5: Verify country capital information on Wikipedia', () => {
-  test.beforeEach(async ({ page }) => {
+  test('TC01-TC04 - Verify Wikipedia capital info flow (single browser session)', async ({ page }) => {
+    // TC01 - Wikipedia homepage loads and search is available
     await page.goto(WIKI_HOME);
-  });
-
-  test('TC01 - Wikipedia homepage loads and search is available', async ({ page }) => {
     await expect(page).toHaveURL(WIKI_HOME);
     await expect(page.getByLabel('Search Wikipedia')).toBeVisible();
-  });
 
-  test('TC02 - Search India and verify capital is New Delhi', async ({ page }) => {
-    await searchFromHome(page, 'India');
-
-    await expect(page.getByRole('heading', { name: 'India' })).toBeVisible();
-    const capital = await getInfoboxCapital(page);
-
-    expect(capital).toMatch(/New Delhi/i);
-  });
-
-  test('TC03 - Navigate back to Wikipedia home from an article', async ({ page }) => {
+    // TC02 - Search India and verify capital is New Delhi
     await searchFromHome(page, 'India');
     await expect(page.getByRole('heading', { name: 'India' })).toBeVisible();
+    const indiaCapital = await getInfoboxCapital(page);
+    expect(indiaCapital).toMatch(/New Delhi/i);
 
+    // TC03 - Navigate back to Wikipedia home from an article
     await page.goBack();
     await expect(page).toHaveURL(WIKI_HOME);
     await expect(page.getByLabel('Search Wikipedia')).toBeVisible();
-  });
 
-  test('TC04 - Search United Kingdom and verify capital is NOT Eastern Cape (negative test)', async ({ page }) => {
-    // Follow the acceptance criteria flow: search India, go back home, then search UK.
-    await searchFromHome(page, 'India');
-    await expect(page.getByRole('heading', { name: 'India' })).toBeVisible();
-
-    await page.goBack();
-    await expect(page).toHaveURL(WIKI_HOME);
-
+    // TC04 - Search United Kingdom and verify capital is NOT Eastern Cape (negative test)
     await searchFromHome(page, 'United Kingdom');
     await expect(page.getByRole('heading', { name: 'United Kingdom' })).toBeVisible();
 
-    const capital = await getInfoboxCapital(page);
-    expect(capital).not.toMatch(/Eastern Cape/i);
+    const ukCapital = await getInfoboxCapital(page);
+    expect(ukCapital).not.toMatch(/Eastern Cape/i);
 
     ensureArtifactsDir();
     await page.screenshot({ path: RESULT_SCREENSHOT, fullPage: true });
